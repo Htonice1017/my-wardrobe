@@ -5,8 +5,8 @@ import WebApp from '@twa-dev/sdk'
 function App() {
   const [items, setItems] = useState([
     { id: 1, name: 'Улюблена футболка', type: 'Верх', emoji: '👕' },
-    { id: 2, name: 'Джинси Levi\'s', type: 'Низ', emoji: '👖' },
-    { id: 3, name: 'Кеди Converse', type: 'Взуття', emoji: '👟' }
+    { id: 2, name: 'Джинси', type: 'Низ', emoji: '👖' },
+    { id: 3, name: 'Кеди', type: 'Взуття', emoji: '👟' }
   ])
 
   const handleAdd = () => {
