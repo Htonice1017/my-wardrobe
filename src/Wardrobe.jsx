@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
+import Compressor from 'compressorjs';
 import { supabase } from './supabaseClient'
 import './App.css'
 import {
     Home, PlusCircle, User, Camera, Image as ImageIcon,
-    Sun, Moon, X, CheckCircle, Layers, RotateCcw,
+    Sun, Moon, X, CheckCircle, Layers, RotateCcw, Star,
     CalendarCheck, Plus, Dices, Watch, Save, Ban, Trash2, Settings
 } from 'lucide-react'
 
@@ -83,10 +84,12 @@ function App() {
             // Встановлюємо дефолтну категорію для додавання
             if (catsData.length > 0) setNewItemCategory(catsData[0].id)
 
-            // 2. Отримуємо речі
+            // 2. Отримуємо речі (Сортування: спочатку улюблені, потім нові)
             const { data: itemsData, error: itemsError } = await supabase
                 .from('wardrobe_items')
                 .select('*')
+                .order('is_favorite', { ascending: false }) // 🔥 Спочатку зірочки
+                .order('created_at', { ascending: false })  // Потім нові
 
             if (itemsError) throw itemsError
 
@@ -108,13 +111,51 @@ function App() {
 
     // --- ACTIONS ---
 
+    // 0. Toggle Favorite (Зірочка)
+    const toggleFavorite = async (e, item) => {
+        e.stopPropagation();
+        e.preventDefault();
+
+        const newStatus = !item.is_favorite;
+
+        // 1. Оптимістичне оновлення стейту (щоб було миттєво)
+        setWardrobe(prev => {
+            const catId = item.category_id;
+            const currentList = prev[catId] || [];
+
+            // Оновлюємо елемент
+            const updatedList = currentList.map(i =>
+                i.id === item.id ? { ...i, is_favorite: newStatus } : i
+            );
+
+            // Пересортовуємо: спочатку улюблені
+            updatedList.sort((a, b) => Number(b.is_favorite) - Number(a.is_favorite));
+
+            return { ...prev, [catId]: updatedList };
+        });
+
+        // 2. Відправка в базу
+        const { error } = await supabase
+            .from('wardrobe_items')
+            .update({ is_favorite: newStatus })
+            .eq('id', item.id);
+
+        if (error) {
+            console.error('Favorite error:', error);
+            fetchData(); // Якщо помилка - перезавантажуємо, щоб скинути
+        }
+    };
+
     // 1. Створити категорію
     const handleCreateCategory = async () => {
         if (!newCatName.trim()) return
 
         // Отримуємо ID користувача
         const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return triggerAction('Потрібно увійти в систему 🔒')
+        if (!user) {
+            // Спробуємо анонімний, якщо немає (але зазвичай App вже залогінив)
+            return triggerAction('Помилка авторизації 🔒')
+        }
 
         const { error } = await supabase
             .from('categories')
@@ -122,7 +163,7 @@ function App() {
                 user_id: user.id,
                 name: newCatName,
                 type: newCatType,
-                emoji: '✨' // Можна додати вибір емодзі пізніше
+                emoji: '✨'
             }])
 
         if (error) {
@@ -132,7 +173,7 @@ function App() {
             triggerAction(`📂 Створено: ${newCatName}`)
             setShowCatModal(false)
             setNewCatName('')
-            fetchData() // Оновлюємо список
+            fetchData()
         }
     }
 
@@ -188,7 +229,8 @@ function App() {
                     user_id: user.id,
                     category_id: newItemCategory,
                     image_url: publicUrl,
-                    seasons: newItemSeasons.length > 0 ? newItemSeasons : ALL_SEASONS
+                    seasons: newItemSeasons.length > 0 ? newItemSeasons : ALL_SEASONS,
+                    is_favorite: false // За замовчуванням
                 }])
 
             if (dbError) throw dbError
@@ -225,14 +267,14 @@ function App() {
         if (error) {
             triggerAction('Помилка видалення ❌')
         } else {
-            // Видаляємо локально, щоб не чекати запиту
+            // Видаляємо локально
             const newWardrobe = { ...wardrobe }
             Object.keys(newWardrobe).forEach(key => {
                 newWardrobe[key] = newWardrobe[key].filter(i => i.id !== itemId)
             })
             setWardrobe(newWardrobe)
 
-            // Очищаємо манекен, якщо річ була вдягнена
+            // Очищаємо манекен
             setOutfit(prev => {
                 const next = { ...prev }
                 Object.keys(next).forEach(slot => {
@@ -247,12 +289,26 @@ function App() {
 
     // --- HELPER FUNCTIONS ---
 
+    // --- HELPER FUNCTIONS ---
+
     const handleFileSelect = (event) => {
         const file = event.target.files[0]
-        if (file) {
-            setNewItemImageFile(file)
-            setNewItemPreview(URL.createObjectURL(file))
-        }
+        if (!file) return
+
+        // 🔥 СТИСНЕННЯ ФОТО
+        new Compressor(file, {
+            quality: 0.6,      // Знижуємо якість до 60% (економія місця ~90%)
+            maxWidth: 1200,    // Зменшуємо розмір, якщо фото величезне
+            success(result) {
+                // result - це вже стиснений файл
+                setNewItemImageFile(result)
+                setNewItemPreview(URL.createObjectURL(result))
+            },
+            error(err) {
+                console.error('Помилка стиснення:', err.message)
+                triggerAction('Помилка обробки фото ❌')
+            },
+        })
     }
 
     const toggleNewItemSeason = (seasonId) => {
@@ -270,7 +326,6 @@ function App() {
     // Розумний рандомайзер
     const smartRandomize = () => {
         const getItemsByType = (type) => {
-            // Знаходимо всі категорії цього типу
             const relevantCats = categories.filter(c => c.type === type)
             let allItems = []
             relevantCats.forEach(cat => {
@@ -286,7 +341,7 @@ function App() {
         setOutfit({
             head: rand(getItemsByType('head')),
             torsoBase: rand(getItemsByType('torso')),
-            torsoOuter: Math.random() > 0.5 ? rand(getItemsByType('torso')) : null, // 50% шанс
+            torsoOuter: Math.random() > 0.5 ? rand(getItemsByType('torso')) : null,
             legs: rand(getItemsByType('legs')),
             feet: rand(getItemsByType('feet')),
             accLeft: Math.random() > 0.3 ? rand(getItemsByType('acc')) : null,
@@ -300,7 +355,6 @@ function App() {
         if (!selectionSlot) return { items: [], relevantCategories: [] }
 
         const slotType = selectionSlot.type
-        // Фільтруємо категорії, які підходять під слот (напр. тільки взуття)
         const relevantCategories = categories.filter(c => c.type === slotType)
 
         let items = []
@@ -336,9 +390,7 @@ function App() {
 
     const renderItemVisual = (item, size) => {
         if (!item) return null
-        // Якщо є фото з бази (image_url)
         if (item.image_url) return <img src={item.image_url} alt="item" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px' }} />
-        // Якщо старе емодзі
         return <span style={{ fontSize: size }}>{item.emoji || '👕'}</span>
     }
 
@@ -550,11 +602,46 @@ function App() {
                         </div>
                         <div className="selector-grid">
                             {wardrobe[viewingCategory]?.length > 0 ? wardrobe[viewingCategory].map(item => (
-                                <div key={item.id} className="selector-item">
-                                    <button className="delete-item-btn" onClick={(e) => handleDeleteItem(e, item.id)}>
+                                <div
+                                    key={item.id}
+                                    className="selector-item"
+                                    style={{
+                                        position: 'relative',
+                                        touchAction: 'manipulation',
+                                        zIndex: 1
+                                    }}
+                                >
+                                    {/* ⭐ ЗІРОЧКА ⭐ */}
+                                    <div
+                                        onClick={(e) => toggleFavorite(e, item)}
+                                        style={{
+                                            position: 'absolute',
+                                            top: 0,
+                                            left: 0,
+                                            padding: '8px',
+                                            zIndex: 20,
+                                            cursor: 'pointer'
+                                        }}
+                                    >
+                                        <Star
+                                            size={20}
+                                            fill={item.is_favorite ? "#FFD700" : "rgba(0,0,0,0.3)"}
+                                            color={item.is_favorite ? "#FFD700" : "white"}
+                                            strokeWidth={2}
+                                        />
+                                    </div>
+
+                                    {/* ❌ КНОПКА ВИДАЛЕННЯ (посунув трохи вправо, щоб не заважала зірці) */}
+                                    <button
+                                        className="delete-item-btn"
+                                        onClick={(e) => handleDeleteItem(e, item.id)}
+                                        style={{ zIndex: 20 }}
+                                    >
                                         <X size={14} />
                                     </button>
+
                                     {renderItemVisual(item)}
+
                                     <div className="item-tag">
                                         {item.seasons?.length === 4 ? '♾️' : item.seasons?.map(sid => SEASONS_CONFIG.find(s => s.id === sid)?.icon)}
                                     </div>
@@ -587,7 +674,23 @@ function App() {
 
                         <div className="selector-grid">
                             {selectorData.items && selectorData.items.length > 0 ? selectorData.items.map(item => (
-                                <div key={item.id} className="selector-item" onClick={() => selectItem(item)}>
+                                <div
+                                    key={item.id}
+                                    className="selector-item"
+                                    onClick={() => selectItem(item)}
+                                    style={{
+                                        position: 'relative',
+                                        cursor: 'pointer',
+                                        touchAction: 'manipulation' // 🔥 Фікс кліку
+                                    }}
+                                >
+                                    {/* Також показуємо зірочку в конструкторі, щоб швидко знайти улюблене */}
+                                    {item.is_favorite && (
+                                        <div style={{ position: 'absolute', top: 5, left: 5, zIndex: 10 }}>
+                                            <Star size={16} fill="#FFD700" color="#FFD700" />
+                                        </div>
+                                    )}
+
                                     {renderItemVisual(item)}
                                     {(outfit.torsoBase?.id === item.id || outfit.torsoOuter?.id === item.id || outfit[selectionSlot.slot]?.id === item.id) &&
                                         <div style={{ position: 'absolute', top: 4, right: 4, background: 'var(--accent-color)', borderRadius: '50%', padding: '2px', display: 'flex' }}><CheckCircle size={14} color="white" /></div>

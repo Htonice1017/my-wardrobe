@@ -591,6 +591,8 @@ h1 {
 }
 
 .selector-grid {
+  position: relative;
+  z-index: 5;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;
@@ -600,6 +602,14 @@ h1 {
 }
 
 .selector-item {
+  /* Курсор-палець на комп'ютері */
+  /* Щоб працював z-index */
+  z-index: 10;
+  /* Піднімаємо над іншими шарами */
+  touch-action: manipulation;
+  /* Покращує реакцію на тапи на мобільному */
+  user-select: none;
+  /* Щоб текст не виділявся при подвійному тапі */
   aspect-ratio: 1;
   background: var(--bg-color);
   border-radius: 16px;
