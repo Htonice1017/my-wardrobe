@@ -1,128 +1,186 @@
-/* src/App.css */
+/* --- ЗМІННІ ТА КОЛЬОРИ --- */
 :root {
-  /* Темна тема (стандартна) */
-  --bg-color: #0f0f0f;
-  --card-bg: #1a1a1a;
-  --text-color: #ffffff;
-  --text-secondary: #888888;
+  --bg-color: #0f172a;
+  /* Темно-синій фон */
+  --card-bg: #1e293b;
+  /* Фон карток */
+  --text-primary: #ffffff;
+  /* Основний текст */
+  --text-secondary: #94a3b8;
+  /* Додатковий текст */
   --accent-color: #3b82f6;
-  --nav-bg: #212121;
-  --border-color: #333;
-  --input-bg: #2a2a2a;
+  /* Акцентний синій */
+  --border-color: #334155;
+  /* Колір рамок */
+  --nav-height: 80px;
+  /* Висота нижнього меню */
 }
 
-/* Світла тема (активується класом light) */
+/* Світла тема */
 [data-theme='light'] {
-  --bg-color: #f3f4f6;
+  --bg-color: #f8fafc;
   --card-bg: #ffffff;
-  --text-color: #111827;
-  --text-secondary: #6b7280;
-  --accent-color: #2563eb;
-  --nav-bg: #ffffff;
-  --border-color: #e5e7eb;
-  --input-bg: #f9fafb;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --border-color: #e2e8f0;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background-color: var(--bg-color);
-  color: var(--text-color);
   margin: 0;
   padding: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  transition: background-color 0.3s, color 0.3s;
-  /* Плавний перехід */
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
 
+/* --- ГОЛОВНИЙ КОНТЕЙНЕР --- */
 .app-container {
-  padding-bottom: 90px;
-  padding-top: 20px;
-  padding-left: 16px;
-  padding-right: 16px;
-  max-width: 600px;
+  max-width: 480px;
+  /* Обмеження ширини як у мобільного додатка */
   margin: 0 auto;
+  min-height: 100vh;
+  padding: 20px 20px 100px 20px;
+  /* Відступ знизу для меню */
+  position: relative;
+  display: flex;
+  flex-direction: column;
 }
 
-/* ЗАГОЛОВОК І ТЕМА */
+/* --- ЗАГОЛОВКИ ТА ШАПКА --- */
+h1 {
+  font-size: 28px;
+  margin: 0;
+}
+
 .header-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 
-h1 {
-  font-size: 28px;
-  font-weight: 800;
-  margin: 0;
+.section-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 24px 0 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
+/* --- КНОПКИ ТА ФІЛЬТРИ --- */
 .theme-btn {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
-  color: var(--text-color);
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  color: var(--text-primary);
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
+  transition: 0.2s;
 }
 
-/* ФІЛЬТРИ (СЕЗОНИ) */
 .filters-row {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  padding-bottom: 16px;
+  padding-bottom: 8px;
   scrollbar-width: none;
-  /* Приховати скрол */
+  /* Приховати скролбар */
+  margin-bottom: 24px;
 }
 
 .filter-chip {
+  padding: 8px 16px;
   background: var(--card-bg);
-  border: 1px solid var(--border-color);
-  color: var(--text-secondary);
-  padding: 6px 16px;
   border-radius: 20px;
-  font-size: 13px;
+  font-size: 14px;
   white-space: nowrap;
+  border: 1px solid var(--border-color);
   cursor: pointer;
+  transition: 0.2s;
 }
 
 .filter-chip.active {
-  background: var(--accent-color);
-  color: white;
-  border-color: var(--accent-color);
-}
-
-/* СЕКЦІЯ "УЛЮБЛЕНЕ" */
-.section-title {
-  font-size: 18px;
+  background: var(--text-primary);
+  color: var(--bg-color);
+  border-color: var(--text-primary);
   font-weight: 600;
-  margin-bottom: 12px;
-  margin-top: 10px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
 }
 
-.favorites-row {
-  display: flex;
+/* --- СІТКА ТА КАРТКИ --- */
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 12px;
-  overflow-x: auto;
-  padding-bottom: 16px;
 }
 
-.fav-card {
-  min-width: 100px;
-  height: 100px;
+.card {
   background: var(--card-bg);
-  border-radius: 12px;
+  border-radius: 20px;
+  padding: 16px;
+  border: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.card:active {
+  transform: scale(0.98);
+}
+
+.card-title {
+  font-weight: 600;
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.emoji {
+  font-size: 32px;
+}
+
+.category-arrow {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  opacity: 0.3;
+}
+
+/* Картка додавання категорії (пунктирна) */
+.add-cat-card {
+  border-style: dashed;
+  border-color: var(--accent-color);
+  background: transparent;
+}
+
+/* --- ВИБРАНЕ (FAVORITES) --- */
+.favorites-row {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.fav-card {
+  min-width: 100px;
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   border: 1px solid var(--border-color);
   position: relative;
 }
@@ -131,169 +189,368 @@ h1 {
   position: absolute;
   top: 8px;
   right: 8px;
-  color: gold;
 }
 
-/* КАТЕГОРІЇ */
-.grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-.card {
-  background-color: var(--card-bg);
-  padding: 20px;
-  border-radius: 16px;
+.fav-name {
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 4px;
   text-align: center;
-  border: 1px solid var(--border-color);
-  min-height: 80px;
+}
+
+/* --- СТУДІЯ / КОНСТРУКТОР (App Studio) --- */
+.studio-container {
+  padding-top: 10px;
+  padding-bottom: 20px;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+}
+
+.studio-header {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  margin-bottom: 16px;
+}
+
+/* Сітка манекена (3 колонки: Аксесуар - Тіло - Аксесуар) */
+.mannequin-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 10px;
+  width: 100%;
+  max-width: 350px;
+  margin: 0 auto;
+  align-items: center;
+  /* Центрування аксесуарів по вертикалі відносно тіла */
+}
+
+.center-column,
+.side-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.side-column {
+  gap: 20px;
+  justify-content: center;
+  height: 100%;
+}
+
+/* --- СЛОТИ ОДЯГУ --- */
+.slot {
+  width: 100px;
+  height: 100px;
+  border: 2px dashed var(--border-color);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.03);
+  margin-bottom: 8px;
+  position: relative;
+  transition: all 0.2s;
   cursor: pointer;
 }
 
-/* Кнопка "Додати категорію" */
-.card.add-new {
-  border: 2px dashed var(--border-color);
+.slot:active {
+  border-color: var(--accent-color);
+  transform: scale(0.95);
+}
+
+.slot.filled {
+  border-style: solid;
+  border-color: transparent;
   background: transparent;
+}
+
+.slot-icon {
+  opacity: 0.2;
+}
+
+/* Специфічні розміри слотів */
+.slot.head {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+}
+
+.slot.torso {
+  width: 130px;
+  height: 150px;
+}
+
+.slot.legs {
+  width: 110px;
+  height: 160px;
+}
+
+/* Слот взуття (подвійний) */
+.slot.feet {
+  width: 130px;
+  height: 60px;
+  display: flex;
+  gap: 8px;
+  border: none;
+  background: none;
+}
+
+.shoe-box {
+  border: 2px dashed var(--border-color);
+  flex: 1;
+  height: 100%;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Слот аксесуарів */
+.accessory-slot {
+  width: 60px !important;
+  height: 60px !important;
+  border-radius: 12px !important;
+  opacity: 0.8;
+}
+
+/* Підписи під речами */
+.item-label-mini {
+  font-size: 9px;
   color: var(--text-secondary);
+  text-align: center;
+  margin-top: -15px;
+  margin-bottom: 15px;
+  width: 100px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.emoji {
-  font-size: 32px;
-  margin-bottom: 8px;
-  display: block;
+.hint-text {
+  text-align: center;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 10px;
 }
 
-.card-title {
+/* Кнопки дій в студії */
+.studio-actions {
+  margin-top: auto;
+  padding-top: 20px;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* Кнопка "Авто" (Рандомайзер) */
+.random-btn {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
   font-size: 14px;
-  font-weight: 500;
+  cursor: pointer;
 }
 
-/* ПРОФІЛЬ */
-.profile-header {
+.random-btn:active {
+  transform: scale(0.95);
+}
+
+/* --- БАНЕРИ ТА ІНШІ КАРТКИ --- */
+.studio-banner {
+  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+  border: none;
+  margin-bottom: 24px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  justify-content: flex-start;
+  flex-direction: row;
+}
+
+.icon-circle {
+  background: rgba(255, 255, 255, 0.2);
+  padding: 10px;
+  border-radius: 50%;
+}
+
+.banner-title {
+  color: white;
+  font-weight: 800;
+  font-size: 18px;
+}
+
+.banner-subtitle {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 13px;
+}
+
+/* Картки "Додати" (Action Cards) */
+.action-card {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 16px;
+  padding: 16px;
+}
+
+.icon-box {
+  padding: 12px;
+  border-radius: 12px;
+  display: flex;
+}
+
+.icon-box.blue {
+  background: #3b82f6;
+}
+
+.icon-box.purple {
+  background: #8b5cf6;
+}
+
+.icon-box.orange {
+  background: #f59e0b;
+}
+
+.text-box {
+  text-align: left;
+}
+
+.ai-card {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: #f59e0b;
+}
+
+.orange-text {
+  color: #f59e0b;
+}
+
+/* Загальні стилі кнопок */
+.action-button.primary {
+  background: var(--accent-color);
+  color: white;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px;
+  border: none;
+  border-radius: 16px;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.action-button.icon-only {
+  width: auto;
+  padding: 12px 16px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+/* --- ПРОФІЛЬ --- */
+.profile-card {
   display: flex;
   align-items: center;
   gap: 16px;
-  background: var(--card-bg);
-  padding: 20px;
-  border-radius: 20px;
-  margin-bottom: 24px;
-  border: 1px solid var(--border-color);
+  margin-bottom: 30px;
 }
 
 .avatar {
   width: 60px;
   height: 60px;
-  border-radius: 50%;
   background: var(--accent-color);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 24px;
-  font-weight: bold;
+  font-weight: 800;
   color: white;
 }
 
-.user-info h2 {
-  margin: 0;
-  font-size: 20px;
+.big-num {
+  font-size: 24px;
+  font-weight: 800;
 }
 
-.user-info p {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: 14px;
-  margin-top: 4px;
-}
-
-/* КНОПКИ ДІЇ (З попереднього кроку) */
-.action-button {
-  display: flex;
-  align-items: center;
-  background-color: var(--card-bg);
-  border: 1px solid var(--border-color);
-  padding: 16px;
-  border-radius: 16px;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  margin-bottom: 12px;
-}
-
-.icon-wrapper {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 16px;
-}
-
-.icon-wrapper.blue {
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
-}
-
-.icon-wrapper.purple {
-  background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-}
-
-.icon-wrapper.gold {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-}
-
-.text-wrapper {
-  display: flex;
-  flex-direction: column;
-}
-
-.btn-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-color);
-}
-
-.btn-subtitle {
+.small-label {
   font-size: 12px;
   color: var(--text-secondary);
-  margin-top: 4px;
 }
 
-.ai-button {
-  border: 1px solid rgba(245, 158, 11, 0.5);
-}
-
-/* НАВІГАЦІЯ */
+/* --- НИЖНЯ НАВІГАЦІЯ --- */
 .bottom-nav {
   position: fixed;
   bottom: 0;
   left: 0;
-  right: 0;
-  background-color: var(--nav-bg);
+  width: 100%;
+  height: var(--nav-height);
+  background: var(--card-bg);
   border-top: 1px solid var(--border-color);
   display: flex;
   justify-content: space-around;
-  padding: 12px 0;
-  padding-bottom: max(12px, env(safe-area-inset-bottom));
-  z-index: 1000;
+  align-items: center;
+  z-index: 100;
+  padding-bottom: 10px;
+  /* Врахування Safe Area на iPhone */
 }
 
 .nav-item {
+  background: none;
+  border: none;
+  color: var(--text-secondary);
   display: flex;
   flex-direction: column;
   align-items: center;
-  color: var(--text-secondary);
-  background: none;
-  border: none;
-  font-size: 11px;
   gap: 4px;
+  font-size: 10px;
   cursor: pointer;
+  transition: 0.2s;
 }
 
 .nav-item.active {
   color: var(--accent-color);
+  transform: translateY(-2px);
+}
+
+/* --- ПОВІДОМЛЕННЯ (TOAST) --- */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #10b981;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 200;
+  font-weight: 600;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translate(-50%, -20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
 }
